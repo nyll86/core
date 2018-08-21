@@ -1,5 +1,5 @@
 {
-    "name":              "test core",
+    "name":              "nyll/kernel",
     "description":       "my first core",
     "type":              "library",
     "license":           "MIT",
@@ -21,7 +21,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Kernel\\Core\\": "src/Kernel/Core/"
+            "Kernel\\": "src/Kernel/"
         }
     }
 }
