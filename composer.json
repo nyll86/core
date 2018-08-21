@@ -1,0 +1,27 @@
+{
+    "name":              "test core",
+    "description":       "my first core",
+    "type":              "library",
+    "license":           "MIT",
+    "homepage":          "https://github.com/nyll86/core",
+    "keywords":          [],
+    "authors": [
+        {
+            "name":     "Alexandr Budko",
+            "email":    "alexandr.budko@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.2",
+        "phpunit/phpunit": "^7.3"
+    },
+    "require-dev": {
+        "ext-phar":                  "*",
+        "ext-pdo":                   "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Kernel\\Core\\": "src/Kernel/Core/"
+        }
+    }
+}
