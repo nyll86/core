@@ -8,10 +8,9 @@
 
 namespace Kernel\Core\Model;
 
-
 use Kernel\Core\Environment;
+use Kernel\Core\Model\Mongo\Builder;
 use MongoDB\Client;
-use MongoDB\Collection;
 use MongoDB\Database;
 
 class Mongo
@@ -35,7 +34,7 @@ class Mongo
      *
      * @var array
      */
-    private $collections = [];
+    private $builder = [];
 
     private static $instance = [];
 
@@ -101,21 +100,22 @@ class Mongo
      * get collection mongo
      *
      * @param null|string $name
-     * @return Collection
+     * @return Builder
      * @throws \Kernel\Core\Exception
      */
-    public function getCollection(?string $name = null): Collection
+    public function getBuilder(?string $name = null): Builder
     {
         if ($name === null) {
             $name = Environment::instance()->get('MONGO_COLLECTION');
         }
 
-        if (isset($this->collections[$name])) {
-            return $this->collections[$name];
+        if (isset($this->builder[$name])) {
+            return $this->builder[$name];
         }
 
-        return $this->collections[$name] = $this->getDatabase()->selectCollection($name);
+        $collection = $this->getDatabase()->selectCollection($name);
 
+        return $this->builder[$name] = new Builder($collection);
     }
 
     /**
