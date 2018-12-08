@@ -66,4 +66,27 @@ class Adapter
         return new MysqlBuilder($mysql);
     }
 
+    /**
+     * get redis instance
+     *
+     * @param string|null $host
+     * @param int|null $port
+     * @param int|null $db
+     * @return \Redis
+     * @throws Exception
+     */
+    public static function getRedis(?string $host = null, ?int $port = null, ?int $db = null): \Redis
+    {
+        if ($host === null) {
+            $host = Environment::instance()->get('redis_host');
+        }
+        if ($port === null) {
+            $port = Environment::instance()->get('redis_port');
+        }
+        if ($db === null) {
+            $db = Environment::instance()->get('redis_db');
+        }
+        return Model\Redis::getInstance($host, $port, $db);
+    }
+
 }

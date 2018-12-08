@@ -17,6 +17,7 @@
     "ext-ctype":"*",
     "ext-mysqli":"*",
     "ext-mongodb":"^1.5.0",
+    "ext-redis":"*",
     "mongodb/mongodb":"^1.4.2"
   },
   "require-dev": {
