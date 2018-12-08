@@ -208,7 +208,7 @@ class Router
      * @param string $name
      * @param        $val
      */
-    private static function setParam(string $name, $val)
+    private static function setParam(string $name, $val): void
     {
         self::$params[$name] = $val;
     }

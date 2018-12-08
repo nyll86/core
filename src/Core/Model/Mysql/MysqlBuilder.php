@@ -633,7 +633,6 @@ class MysqlBuilder
      * find nulti result
      *
      * @return array
-     * @throws Exception
      */
     public function multiFind(): array
     {
