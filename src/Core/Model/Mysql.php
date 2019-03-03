@@ -3,23 +3,10 @@
 namespace Kernel\Core\Model;
 
 use Kernel\Core\Exception;
+use Kernel\Core\Service;
 
 class Mysql
 {
-
-    /**
-     * show debug
-     *
-     * @var bool
-     */
-    private static $debug = true;
-
-    /**
-     * debug info (onlu self::$debugLOg === true)
-     *
-     * @var array
-     */
-    private $log = [];
 
     /**
      * params for connect in Db: host name
@@ -64,18 +51,11 @@ class Mysql
     private $mysql;
 
     /**
-     * start time sql run
+     * mysqli instance
      *
-     * @var int
+     * @var Service\Logger
      */
-    private $start = 0;
-
-    /**
-     * counter sql query
-     *
-     * @var int
-     */
-    private $iQuery = 1;
+    private $logger;
 
     /**
      * stmt prepare
@@ -113,7 +93,7 @@ class Mysql
      */
     public static function factory(string $host, string $user, string $pass, string $dbName, string $charset)
     {
-        if(isset(self::$instance[$host])) {
+        if (isset(self::$instance[$host])) {
             return self::$instance[$host];
         }
 
@@ -148,6 +128,9 @@ class Mysql
         $this->pass = $pass;
         $this->dbName = $dbName;
         $this->charset = $charset;
+        if (Service\Debug::getInstance()->enable()) {
+            $this->logger = Service\Logger::factory(self::class);
+        }
     }
 
     private function setCharset(string $charset): void
@@ -185,12 +168,18 @@ class Mysql
     public function query($sql): bool
     {
         $this->checkConnection();
-        $this->startDebug();
-        if (! $this->getMysql()->query($sql)) {
+        if ($this->logger) {
+            $this->logger->startTimer();
+        }
+        $res = $this->getMysql()->query($sql);
+        if ($this->logger) {
+            $this->logger->endTimer();
+            $this->logger->addLog($sql);
+        }
+        if (! $res) {
             $this->errorMessage($sql);
             return false;
         }
-        $this->endDebug($sql);
 
         return true;
     }
@@ -209,9 +198,14 @@ class Mysql
             self::$sql_mode = true;
             $this->clearSqlMode('ONLY_FULL_GROUP_BY');
         }
-        $this->startDebug();
+        if ($this->logger) {
+            $this->logger->startTimer();
+        }
         $result = $this->getMysql()->query($sql);
-        $this->endDebug($sql);
+        if ($this->logger) {
+            $this->logger->endTimer();
+            $this->logger->addLog($sql);
+        }
 
         if (! $result) {
             $this->errorMessage($sql);
@@ -232,6 +226,7 @@ class Mysql
      *
      * @param $sql
      * @return array
+     * @throws Exception
      */
     public function multiFetchAssoc($sql): array
     {
@@ -240,8 +235,14 @@ class Mysql
             self::$sql_mode = true;
             $this->clearSqlMode('ONLY_FULL_GROUP_BY');
         }
-        $this->startDebug();
+        if ($this->logger) {
+            $this->logger->startTimer();
+        }
         $this->getMysql()->multi_query($sql);
+        if ($this->logger) {
+            $this->logger->endTimer();
+            $this->logger->addLog($sql);
+        }
 
         $rows = [];
         $i = 0;
@@ -254,7 +255,6 @@ class Mysql
             }
             $i++;
         } while ($this->getMysql()->more_results() && $this->getMysql()->next_result());
-        $this->endDebug($sql);
         return $rows;
     }
 
@@ -272,11 +272,14 @@ class Mysql
             self::$sql_mode = true;
             $this->clearSqlMode('ONLY_FULL_GROUP_BY');
         }
+        if ($this->logger) {
+            $this->logger->startTimer();
+        }
         self::$stmt = $this->getMysql()->prepare($sql);
         if (! self::$stmt) {
             $this->errorMessage($sql);
         }
-        $this->startDebug();
+
         return $this->bind_param($params, true, $sql);
     }
 
@@ -322,7 +325,6 @@ class Mysql
             $this->errorMessage($sql);
         }
         $this->setLastPrepare($sql, $params);
-        $this->startDebug();
         return $this->bind_param($params, false, $sql);
     }
 
@@ -370,8 +372,12 @@ class Mysql
      */
     private function stmt_fetch_assoc(bool $return, string $sql)
     {
-        if (self::$stmt->execute()) {
-            $this->endDebug($sql);
+        $res = self::$stmt->execute();
+        if ($this->logger) {
+            $this->logger->endTimer();
+            $this->logger->addLog($sql);
+        }
+        if ($res) {
             if ($return === true) {
                 $result = self::$stmt->get_result();
                 $res = [];
@@ -397,26 +403,6 @@ class Mysql
             $this->getMysql()->close();
             $this->mysql = new \mysqli($this->host, $this->user, $this->pass, $this->dbName);
         }
-    }
-
-    /**
-     * set debug log
-     *
-     * @param $debug
-     */
-    public static function setDebugLog(bool $debug): void
-    {
-        self::$debug = $debug;
-    }
-
-    /**
-     * is debug log
-     *
-     * @return bool
-     */
-    public function ISDebugLog(): bool
-    {
-        return self::$debug;
     }
 
     /**
@@ -460,63 +446,40 @@ class Mysql
      * clear sql mode
      *
      * @param $mode
+     * @throws Exception
      */
     public function clearSqlMode($mode): void
     {
         $sql = "SET sql_mode=(SELECT REPLACE(@@sql_mode,'$mode',''))";
-        $this->startDebug();
+        if ($this->logger) {
+            $this->logger->startTimer();
+        }
         $this->getMysql()->query($sql);
-        $this->endDebug($sql);
-    }
-
-    /**
-     * get status debug mode
-     *
-     * @return array
-     */
-    public function getLogs(): array
-    {
-        return $this->log;
+        if ($this->logger) {
+            $this->logger->endTimer();
+            $this->logger->addLog($sql);
+        }
     }
 
     /**
      * get current version MySQL
      *
      * @return string
+     * @throws Exception
      */
     public function getVersion(): string
     {
         $sql = 'SELECT VERSION()';
+        if ($this->logger) {
+            $this->logger->startTimer();
+        }
         $result = $this->getMysql()->query($sql)->fetch_array();
+        if ($this->logger) {
+            $this->logger->endTimer();
+            $this->logger->addLog($sql);
+        }
         $ver = explode('.', $result[0]);
         return (float)$ver[0] . '.' . $ver[1];
-    }
-
-    /**
-     * start debug
-     */
-    private function startDebug(): void
-    {
-        if (self::$debug) {
-            $this->start = microtime(true);
-        }
-    }
-
-    /**
-     * end denug
-     *
-     * @param string $sql
-     */
-    private function endDebug(string $sql): void
-    {
-        if (self::$debug) {
-            $this->log[] = [
-                'i' => $this->iQuery,
-                'sql' => $sql,
-                'mtime' => \round((microtime(true) - $this->start) * 1000, 2),
-            ];
-            $this->iQuery++;
-        }
     }
 
     /**
