@@ -11,6 +11,7 @@ namespace Kernel\Core;
 
 use Kernel\Core\Model\Mongo;
 use Kernel\Core\Model\Mysql\MysqlBuilder;
+use Kernel\Core\Model\Redis;
 
 class Adapter
 {
@@ -72,10 +73,10 @@ class Adapter
      * @param string|null $host
      * @param int|null $port
      * @param int|null $db
-     * @return \Redis
+     * @return Redis|\Redis
      * @throws Exception
      */
-    public static function getRedis(?string $host = null, ?int $port = null, ?int $db = null): \Redis
+    public static function getRedis(?string $host = null, ?int $port = null, ?int $db = null)
     {
         if ($host === null) {
             $host = Environment::instance()->get('redis_host');

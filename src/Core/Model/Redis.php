@@ -21,6 +21,8 @@ class Redis
 
     private static $instance;
 
+    private static $connection;
+
     /**
      * @var LoggerDB
      */
@@ -32,22 +34,22 @@ class Redis
      * @param string $host
      * @param int $port
      * @param int $db
-     * @return \Redis
+     * @return \Redis|self
      * @throws Exception
      */
-    public static function getInstance(string $host, int $port, int $db): \Redis
+    public static function getInstance(string $host, int $port, int $db)
     {
         if (self::$instance !== null) {
             return self::$instance;
         }
-        self::$instance = new \Redis();
-        self::$instance->pconnect($host, $port);
-        self::$instance->select($db);
+        self::$connection = new \Redis();
+        self::$connection->pconnect($host, $port);
+        self::$connection->select($db);
         if (Debug::getInstance()->enable()) {
             self::$logger = LoggerDB::factory(self::class);
         }
 
-        return self::$instance;
+        return self::$instance = new self();
     }
 
     /**
@@ -60,7 +62,7 @@ class Redis
      */
     public function __call($method, array $arguments = [])
     {
-        if (! \method_exists(self::$instance, $method)) {
+        if (! \method_exists(self::$connection, $method)) {
             throw new Exception("Redis method [$method] not exists. Called from " . __METHOD__);
         }
 
@@ -69,7 +71,7 @@ class Redis
         }
 
         try {
-            $result = \call_user_func_array([self::$instance, $method], $arguments);
+            $result = \call_user_func_array([self::$connection, $method], $arguments);
         } catch (\Exception $e) {
             throw new Exception(
                 $e->getMessage(), $e->getCode()
