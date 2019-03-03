@@ -53,9 +53,9 @@ class Mysql
     /**
      * mysqli instance
      *
-     * @var Service\Logger
+     * @var Service\LoggerDB
      */
-    private $logger;
+    private static $logger;
 
     /**
      * stmt prepare
@@ -112,15 +112,21 @@ class Mysql
      */
     private function __construct(string $host, string $user, string $pass, string $dbName, string $charset)
     {
-        $this->mysql = new \mysqli($host, $user, $pass, $dbName);
-        if ($this->mysql->connect_errno) {
-            $this->errorMessage();
-            return;
-        }
-        $this->setCharset($charset);
         $this->setParams($host, $user, $pass, $dbName, $charset);
+        $this->connect();
+        $this->setCharset($charset);
     }
 
+    /**
+     * set all params
+     *
+     * @param string $host
+     * @param string $user
+     * @param string $pass
+     * @param string $dbName
+     * @param string $charset
+     * @throws Exception
+     */
     private function setParams(string $host, string $user, string $pass, string $dbName, string $charset): void
     {
         $this->host = $host;
@@ -129,7 +135,7 @@ class Mysql
         $this->dbName = $dbName;
         $this->charset = $charset;
         if (Service\Debug::getInstance()->enable()) {
-            $this->logger = Service\Logger::factory(self::class);
+            self::$logger = Service\LoggerDB::factory(self::class);
         }
     }
 
@@ -168,13 +174,12 @@ class Mysql
     public function query($sql): bool
     {
         $this->checkConnection();
-        if ($this->logger) {
-            $this->logger->startTimer();
+        if (self::$logger) {
+            self::$logger->startTimer();
         }
         $res = $this->getMysql()->query($sql);
-        if ($this->logger) {
-            $this->logger->endTimer();
-            $this->logger->addLog($sql);
+        if (self::$logger) {
+            self::$logger->addLog($sql);
         }
         if (! $res) {
             $this->errorMessage($sql);
@@ -198,13 +203,12 @@ class Mysql
             self::$sql_mode = true;
             $this->clearSqlMode('ONLY_FULL_GROUP_BY');
         }
-        if ($this->logger) {
-            $this->logger->startTimer();
+        if (self::$logger) {
+            self::$logger->startTimer();
         }
         $result = $this->getMysql()->query($sql);
-        if ($this->logger) {
-            $this->logger->endTimer();
-            $this->logger->addLog($sql);
+        if (self::$logger) {
+            self::$logger->addLog($sql);
         }
 
         if (! $result) {
@@ -235,13 +239,12 @@ class Mysql
             self::$sql_mode = true;
             $this->clearSqlMode('ONLY_FULL_GROUP_BY');
         }
-        if ($this->logger) {
-            $this->logger->startTimer();
+        if (self::$logger) {
+            self::$logger->startTimer();
         }
         $this->getMysql()->multi_query($sql);
-        if ($this->logger) {
-            $this->logger->endTimer();
-            $this->logger->addLog($sql);
+        if (self::$logger) {
+            self::$logger->addLog($sql);
         }
 
         $rows = [];
@@ -272,8 +275,8 @@ class Mysql
             self::$sql_mode = true;
             $this->clearSqlMode('ONLY_FULL_GROUP_BY');
         }
-        if ($this->logger) {
-            $this->logger->startTimer();
+        if (self::$logger) {
+            self::$logger->startTimer();
         }
         self::$stmt = $this->getMysql()->prepare($sql);
         if (! self::$stmt) {
@@ -373,9 +376,9 @@ class Mysql
     private function stmt_fetch_assoc(bool $return, string $sql)
     {
         $res = self::$stmt->execute();
-        if ($this->logger) {
-            $this->logger->endTimer();
-            $this->logger->addLog($sql);
+        if (self::$logger) {
+
+            self::$logger->addLog($sql);
         }
         if ($res) {
             if ($return === true) {
@@ -396,12 +399,36 @@ class Mysql
 
     /**
      * check connection
+     *
+     * @throws Exception
      */
     private function checkConnection(): void
     {
         if (! $this->getMysql()->ping()) {
+            $this->connect(true);
+        }
+    }
+
+    /**
+     * connect to mysql server
+     *
+     * @param bool $close
+     * @throws Exception
+     */
+    private function connect($close = false): void
+    {
+        if ($close) {
             $this->getMysql()->close();
-            $this->mysql = new \mysqli($this->host, $this->user, $this->pass, $this->dbName);
+        }
+        $this->mysql = new \mysqli($this->host, $this->user, $this->pass, $this->dbName);
+        if (self::$logger) {
+            self::$logger->startTimer();
+        }
+        if ($this->mysql->connect_errno) {
+            $this->errorMessage();
+        }
+        if (self::$logger) {
+            self::$logger->addLog('connect');
         }
     }
 
@@ -451,13 +478,13 @@ class Mysql
     public function clearSqlMode($mode): void
     {
         $sql = "SET sql_mode=(SELECT REPLACE(@@sql_mode,'$mode',''))";
-        if ($this->logger) {
-            $this->logger->startTimer();
+        if (self::$logger) {
+            self::$logger->startTimer();
         }
         $this->getMysql()->query($sql);
-        if ($this->logger) {
-            $this->logger->endTimer();
-            $this->logger->addLog($sql);
+        if (self::$logger) {
+
+            self::$logger->addLog($sql);
         }
     }
 
@@ -470,13 +497,12 @@ class Mysql
     public function getVersion(): string
     {
         $sql = 'SELECT VERSION()';
-        if ($this->logger) {
-            $this->logger->startTimer();
+        if (self::$logger) {
+            self::$logger->startTimer();
         }
         $result = $this->getMysql()->query($sql)->fetch_array();
-        if ($this->logger) {
-            $this->logger->endTimer();
-            $this->logger->addLog($sql);
+        if (self::$logger) {
+            self::$logger->addLog($sql);
         }
         $ver = explode('.', $result[0]);
         return (float)$ver[0] . '.' . $ver[1];

@@ -10,7 +10,7 @@ namespace Kernel\Core\Service;
 
 use Kernel\Core\Exception;
 
-class Logger
+class LoggerDB
 {
     private const LOG_TEXT = 0;
     private const LOG_TIME = 1;
@@ -26,7 +26,7 @@ class Logger
      * factory
      *
      * @param string $name
-     * @return Logger
+     * @return LoggerDB
      */
     public static function factory(string $name): self
     {
@@ -36,6 +36,23 @@ class Logger
 
         return self::$instance[$name] = new self($name);
     }
+
+    /**
+     * get all logs
+     *
+     * @return array
+     */
+    public static function getAllLogs(): array
+    {
+        $res = [];
+        foreach (self::$instance as $instance) {
+            /** @var self $instance */
+            $res[$instance->getName()] = $instance->getLogs();
+        }
+
+        return $res;
+    }
+
 
     /**
      * log name
@@ -85,6 +102,7 @@ class Logger
      * end timer
      *
      * @throws Exception
+     *
      */
     public function endTimer(): void
     {
@@ -133,11 +151,11 @@ class Logger
             self::LOG_TEXT => $query,
         ];
         if ($timer = $this->getTimer()) {
-            $log[self::LOG_TIME] = $timer;
+            $log[self::LOG_TIME] = round((microtime(true) - $timer) * 1000, 3);
+            $this->clearTimer();
         }
 
         $this->log[] = $log;
-        $this->clearTimer();
     }
 
     /**

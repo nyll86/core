@@ -8,6 +8,8 @@
 
 namespace Kernel\Core\Model\Mongo;
 
+use Kernel\Core\Service\Debug;
+use Kernel\Core\Service\LoggerDB;
 use MongoDB\Collection;
 use MongoDB\Model;
 
@@ -34,12 +36,21 @@ class Builder
     private $cache = [];
 
     /**
+     * logger
+     *
+     * @var LoggerDB
+     */
+    private static $logger;
+
+    /**
      * Builder constructor.
      * @param Collection $collection
+     * @throws \Kernel\Core\Exception
      */
     public function __construct(Collection $collection)
     {
         $this->setCollection($collection);
+        $this->init();
     }
 
     /**
@@ -57,11 +68,12 @@ class Builder
      *
      * @param int $id
      * @return array
+     * @throws \Kernel\Core\Exception
      */
     public function getById(int $id): array
     {
         // if already upload in cache
-        if($this->inCache($id) === true) {
+        if ($this->inCache($id) === true) {
 
             // unload cache
             return $this->unloadFromCache($id);
@@ -69,8 +81,15 @@ class Builder
 
         // get result
         /** @var Model\BSONDocument $doc */
+
+        if(self::$logger) {
+            self::$logger->startTimer();
+        }
         $doc = $this->getCollection()
             ->findOne(['_id' => $id]);
+        if(self::$logger) {
+            self::$logger->addLog('find by id #' . $id);
+        }
 
         // modify to array
         $result = $this->toArray($doc);
@@ -141,6 +160,18 @@ class Builder
     private function uploadInCache(int $id, array $data): void
     {
         $this->cache[$id] = $data;
+    }
+
+    /**
+     * init builder
+     *
+     * @throws \Kernel\Core\Exception
+     */
+    private function init(): void
+    {
+        if (Debug::getInstance()->enable()) {
+            self::$logger = LoggerDB::factory(self::class);
+        }
     }
 
 }
