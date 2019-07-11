@@ -1,6 +1,6 @@
 {
   "name": "nyll/kernel",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "my first core",
   "type": "library",
   "license": "MIT",
@@ -18,12 +18,13 @@
     "ext-mysqli":"*",
     "ext-mongodb":"^1.5.0",
     "ext-redis":"*",
+    "ext-curl": "*",
+    "ext-phar": "*",
+    "ext-pdo": "*",
     "mongodb/mongodb":"^1.4.2"
   },
   "require-dev": {
-    "ext-phar": "*",
-    "ext-pdo": "*",
-    "ext-mongodb":"^1.5"
+    "codeception/base": "^3.0"
   },
   "autoload": {
     "psr-4": {
