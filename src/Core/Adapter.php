@@ -8,7 +8,6 @@
 
 namespace Kernel\Core;
 
-
 use Kernel\Core\Model\Mongo;
 use Kernel\Core\Model\Mysql\MysqlBuilder;
 use Kernel\Core\Model\Redis;

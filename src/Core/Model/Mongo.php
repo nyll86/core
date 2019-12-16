@@ -9,6 +9,7 @@
 namespace Kernel\Core\Model;
 
 use Kernel\Core\Environment;
+use Kernel\Core\Exception;
 use Kernel\Core\Model\Mongo\Builder;
 use MongoDB\Client;
 use MongoDB\Database;
@@ -20,23 +21,23 @@ class Mongo
      *
      * @var Client
      */
-    private $client;
+    private Client $client;
 
     /**
      * mongoDB database
      *
      * @var Database
      */
-    private $database;
+    private Database $database;
 
     /**
      * mongoDB collections
      *
      * @var array
      */
-    private $builder = [];
+    private array $builder = [];
 
-    private static $instance = [];
+    private static array $instance = [];
 
     /**
      * factory mongo
@@ -47,10 +48,7 @@ class Mongo
      */
     public static function factory(string $host, int $port)
     {
-        if (! isset(self::$instance[$host])) {
-            self::$instance = new self($host, $port);
-        }
-        return self::$instance;
+        return self::$instance[$host] ??= new self($host, $port);
     }
 
     /**
@@ -82,7 +80,7 @@ class Mongo
      *
      * @param null|string $name
      * @return Database
-     * @throws \Kernel\Core\Exception
+     * @throws Exception
      */
     public function getDatabase(?string $name = null): Database
     {
@@ -101,7 +99,7 @@ class Mongo
      *
      * @param null|string $name
      * @return Builder
-     * @throws \Kernel\Core\Exception
+     * @throws Exception
      */
     public function getBuilder(?string $name = null): Builder
     {

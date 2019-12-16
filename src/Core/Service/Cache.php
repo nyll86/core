@@ -20,14 +20,14 @@ class Cache
      *
      * @var self
      */
-    private static $instance;
+    private static Cache $instance;
 
     /**
      * available service
      *
      * @var bool
      */
-    private $available;
+    private bool $available;
 
     /**
      * get instance

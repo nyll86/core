@@ -13,72 +13,72 @@ class Mysql
      *
      * @var string
      */
-    private $host;
+    private string $host;
 
     /**
      * params for connect in Db: user name
      *
      * @var string
      */
-    private $user;
+    private string $user;
 
     /**
      * params for connect in Db: pass
      *
      * @var string
      */
-    private $pass;
+    private string $pass;
 
     /**
      * params for connect in Db: db name
      *
      * @var string
      */
-    private $dbName;
+    private string $dbName;
 
     /**
      * params for connect in Db: charset
      *
      * @var string
      */
-    private $charset;
+    private string $charset;
 
     /**
      * mysqli instance
      *
      * @var \mysqli
      */
-    private $mysql;
+    private \mysqli $mysql;
 
     /**
      * mysqli instance
      *
      * @var Service\LoggerDB
      */
-    private static $logger;
+    private static Service\LoggerDB $logger;
 
     /**
      * stmt prepare
      *
      * @var \mysqli_stmt
      */
-    private static $stmt;
+    private static \mysqli_stmt $stmt;
 
     /**
      * last prepare
      *
      * @var
      */
-    private $lastPrepare;
+    private string $lastPrepare;
 
     /**
      * set sql mode
      *
      * @var boolean
      */
-    private static $sql_mode = false;
+    private static bool $sql_mode = false;
 
-    private static $instance = [];
+    private static array $instance = [];
 
     /**
      * factory DB
@@ -93,11 +93,7 @@ class Mysql
      */
     public static function factory(string $host, string $user, string $pass, string $dbName, string $charset)
     {
-        if (isset(self::$instance[$host])) {
-            return self::$instance[$host];
-        }
-
-        return self::$instance[$host] = new self($host, $user, $pass, $dbName, $charset);
+        return self::$instance[$host] ??= new self($host, $user, $pass, $dbName, $charset);
     }
 
 

@@ -16,21 +16,21 @@ class Router
      *
      * @var array
      */
-    private static $params = [];
+    private static array $params = [];
 
     /**
      * pattern callback
      *
      * @var string
      */
-    private static $acceptPattern = 'a-zA-Z0-9';
+    private static string $acceptPattern = 'a-zA-Z0-9';
 
     /**
      * routes path
      *
      * @var string
      */
-    protected static $routesPath = ROOT . 'routes';
+    protected static string $routesPath = ROOT . 'routes';
 
     /**
      * type methods
@@ -222,7 +222,7 @@ class Router
      */
     private static function hasMethod(string $method): bool
     {
-        return $_SERVER['REQUEST_METHOD'] ?? null === strtoupper($method);
+        return $_SERVER['REQUEST_METHOD'] ?? strtoupper($method) === null;
     }
 
     /**

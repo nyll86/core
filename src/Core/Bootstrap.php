@@ -26,8 +26,7 @@ class Bootstrap
      */
     public static function autoload($classname): void
     {
-        $dir = ROOT;
-        $filename = $dir . str_replace('\\', DIRECTORY_SEPARATOR, $classname) . '.php';
+        $filename = ROOT . str_replace('\\', DIRECTORY_SEPARATOR, $classname) . '.php';
         if (file_exists($filename)) {
             require $filename;
         }

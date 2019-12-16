@@ -17,7 +17,7 @@ class Environment
      */
     public const EMPTY_ENV = false;
 
-    private static $envPath = ROOT . '.env';
+    private static string $envPath = ROOT . '.env';
 
     /**
      * load env
@@ -36,7 +36,7 @@ class Environment
         $data = file_get_contents($path);
         $env = explode("\n", $data);
 
-        self::search($env, function ($name, $val) {
+        self::search($env, static function ($name, $val) {
             self::set($name, $val);
         });
 

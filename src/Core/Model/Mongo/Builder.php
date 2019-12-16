@@ -8,6 +8,7 @@
 
 namespace Kernel\Core\Model\Mongo;
 
+use Kernel\Core\Exception;
 use Kernel\Core\Service\Debug;
 use Kernel\Core\Service\LoggerDB;
 use MongoDB\Collection;
@@ -26,26 +27,26 @@ class Builder
      *
      * @var Collection
      */
-    private $collection;
+    private Collection $collection;
 
     /**
      * local cache
      *
      * @var array
      */
-    private $cache = [];
+    private array $cache = [];
 
     /**
      * logger
      *
      * @var LoggerDB
      */
-    private static $logger;
+    private static LoggerDB $logger;
 
     /**
      * Builder constructor.
      * @param Collection $collection
-     * @throws \Kernel\Core\Exception
+     * @throws Exception
      */
     public function __construct(Collection $collection)
     {
@@ -68,7 +69,7 @@ class Builder
      *
      * @param int $id
      * @return array
-     * @throws \Kernel\Core\Exception
+     * @throws Exception
      */
     public function getById(int $id): array
     {
@@ -82,12 +83,12 @@ class Builder
         // get result
         /** @var Model\BSONDocument $doc */
 
-        if(self::$logger) {
+        if (self::$logger) {
             self::$logger->startTimer();
         }
         $doc = $this->getCollection()
             ->findOne(['_id' => $id]);
-        if(self::$logger) {
+        if (self::$logger) {
             self::$logger->addLog('find by id #' . $id);
         }
 
@@ -104,12 +105,14 @@ class Builder
      * reduction to array
      *
      * @param Model\BSONDocument|Model\BSONArray $document
-     * @return array
+     * @return array|null
      */
-    private function toArray($document): array
+    private function toArray($document): ?array
     {
-        $data = $document->getArrayCopy();
-        if (\is_array($data)) {
+        if (! $data = $document->getArrayCopy()) {
+            return null;
+        }
+        if (is_array($data)) {
             foreach ($data as &$item) {
                 if ($item instanceof Model\BSONDocument || $item instanceof Model\BSONArray) {
                     $item = $this->toArray($item);
@@ -165,7 +168,7 @@ class Builder
     /**
      * init builder
      *
-     * @throws \Kernel\Core\Exception
+     * @throws Exception
      */
     private function init(): void
     {

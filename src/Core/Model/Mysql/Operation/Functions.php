@@ -30,7 +30,7 @@ class Functions
     /**
      * @var MysqlBuilder
      */
-    private $mysqlBuilder;
+    private MysqlBuilder $mysqlBuilder;
 
     /**
      * Functions constructor.

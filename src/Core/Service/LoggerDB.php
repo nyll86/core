@@ -20,7 +20,7 @@ class LoggerDB
      *
      * @var array
      */
-    private static $instance = [];
+    private static array $instance = [];
 
     /**
      * factory
@@ -30,11 +30,7 @@ class LoggerDB
      */
     public static function factory(string $name): self
     {
-        if (isset(self::$instance[$name])) {
-            return self::$instance[$name];
-        }
-
-        return self::$instance[$name] = new self($name);
+        return self::$instance[$name] ??= new self($name);
     }
 
     /**
@@ -59,21 +55,21 @@ class LoggerDB
      *
      * @var string
      */
-    private $name;
+    private string $name;
 
     /**
      * timer
      *
-     * @var int
+     * @var int|null
      */
-    private $timer;
+    private ?int $timer;
 
     /**
      * log
      *
      * @var array
      */
-    private $log = [];
+    private array $log = [];
 
     /**
      * get name

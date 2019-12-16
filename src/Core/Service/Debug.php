@@ -9,6 +9,7 @@
 namespace Kernel\Core\Service;
 
 use Kernel\Core\Environment;
+use Kernel\Core\Exception;
 
 /**
  * Class Debug
@@ -23,7 +24,7 @@ class Debug
 
     /**
      * @return Debug
-     * @throws \Kernel\Core\Exception
+     * @throws Exception
      */
     public static function getInstance(): self
     {
@@ -41,7 +42,7 @@ class Debug
 
     /**
      * Debug constructor.
-     * @throws \Kernel\Core\Exception
+     * @throws Exception
      */
     private function __construct()
     {
@@ -59,7 +60,7 @@ class Debug
     }
 
     /**
-     * @throws \Kernel\Core\Exception
+     * @throws Exception
      */
     private function init(): void
     {

@@ -36,7 +36,7 @@ class Condition
     public const TYPE_NOT_BETWEEN = '__not_between__';
     public const TYPE_OWN = '__own__';
 
-    private $mysqlBuilder;
+    private MysqlBuilder $mysqlBuilder;
 
     public function __construct(MysqlBuilder $builder)
     {
@@ -195,7 +195,7 @@ class Condition
                 break;
 
             case self::TYPE_IS:
-                if (\is_array($value)) {
+                if (is_array($value)) {
                     $data = Helper::getKeyValue($value);
                     $key = $this->getKey($data[0]);
                     $value = $data[1];
@@ -209,7 +209,7 @@ class Condition
                 break;
 
             case self::TYPE_NOT_IS:
-                if (\is_array($value)) {
+                if (is_array($value)) {
                     $data = Helper::getKeyValue($value);
                     $key = $this->getKey($data[0]);
                     $value = $data[1];
@@ -233,6 +233,7 @@ class Condition
                 break;
 
             case self::TYPE_NOT_BETWEEN:
+            case self::TYPE_OWN:
                 $data = Helper::getKeyValue($value);
                 $key = $this->getKey($data[0]);
                 [$from, $to] = $data[1];
@@ -241,17 +242,6 @@ class Condition
 
                 $sql = "$key NOT BETWEEN $from AND $to";
                 break;
-
-            case self::TYPE_OWN:
-                $data = Helper::getKeyValue($value);
-                $key = $this->getKey($data[0]);
-                [$from, $to] = $data[1];
-                $from = $this->getMysqlBuilder()->getValue($from);
-                $to = $this->getMysqlBuilder()->getValue($to);
-
-                $sql = "$key BETWEEN $from AND $to";
-                break;
-
 
             default:
                 $value = $this->getMysqlBuilder()->getValue($value);

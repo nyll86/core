@@ -19,14 +19,14 @@ use Kernel\Core\Service\LoggerDB;
 class Redis
 {
 
-    private static $instance;
+    private static self $instance;
 
-    private static $connection;
+    private static \Redis $connection;
 
     /**
      * @var LoggerDB
      */
-    private static $logger;
+    private static LoggerDB $logger;
 
     /**
      * get instance Redis
@@ -62,7 +62,7 @@ class Redis
      */
     public function __call($method, array $arguments = [])
     {
-        if (! \method_exists(self::$connection, $method)) {
+        if (! method_exists(self::$connection, $method)) {
             throw new Exception("Redis method [$method] not exists. Called from " . __METHOD__);
         }
 
@@ -71,7 +71,7 @@ class Redis
         }
 
         try {
-            $result = \call_user_func_array([self::$connection, $method], $arguments);
+            $result = call_user_func_array([self::$connection, $method], $arguments);
         } catch (\Exception $e) {
             throw new Exception(
                 $e->getMessage(), $e->getCode()

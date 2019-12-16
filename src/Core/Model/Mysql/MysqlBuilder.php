@@ -12,28 +12,28 @@ class MysqlBuilder
      *
      * @var Mysql
      */
-    private $mysql;
+    private Mysql $mysql;
 
     /**
      * sql string for query
      *
      * @var string
      */
-    private $sql;
+    private string $sql;
 
     /**
      * for multi query
      *
      * @var array
      */
-    private $multi = [];
+    private array $multi = [];
 
     /**
      * prepare params for prepare query
      *
      * @var array
      */
-    private $prepare_params = [];
+    private array $prepare_params = [];
 
     /**
      * CONSTANT
@@ -59,13 +59,13 @@ class MysqlBuilder
      *
      * @var boolean
      */
-    private $newQuery = true;
+    private bool $newQuery = true;
 
-    private $isMulti = false;
+    private bool $isMulti = false;
 
-    private $functions;
+    private Mysql\Operation\Functions $functions;
 
-    private $condition;
+    private Mysql\Operation\Condition $condition;
 
     /**
      * MysqlBuilder constructor.
@@ -116,11 +116,11 @@ class MysqlBuilder
             $this->setMode('GET');
         }
 
-        if (\is_array($params)) {
+        if (is_array($params)) {
             $attr = [];
             foreach ($params as $key => $value) {
                 $value = $this->getFunctions()->check($value, true);
-                if (\is_string($key)) {
+                if (is_string($key)) {
                     $attr[] = "$value as `$key`";
                 } else {
                     $attr[] = $value;

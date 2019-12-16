@@ -13,7 +13,7 @@
     }
   ],
   "require": {
-    "php": ">=7.2",
+    "php": ">=7.4",
     "ext-ctype":"*",
     "ext-mysqli":"*",
     "ext-mongodb":"^1.5.0",
@@ -21,7 +21,8 @@
     "ext-curl": "*",
     "ext-phar": "*",
     "ext-pdo": "*",
-    "mongodb/mongodb":"^1.4.2"
+    "mongodb/mongodb":"^1.4.2",
+    "ext-apcu": "*"
   },
   "require-dev": {
     "codeception/base": "^3.0"
