@@ -28,7 +28,7 @@ class Mongo
      *
      * @var Database
      */
-    private Database $database;
+    private ?Database $database = null;
 
     /**
      * mongoDB collections

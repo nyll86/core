@@ -19,7 +19,7 @@ use Kernel\Core\Service\LoggerDB;
 class Redis
 {
 
-    private static self $instance;
+    private static ?self $instance = null;
 
     private static \Redis $connection;
 

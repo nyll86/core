@@ -60,9 +60,9 @@ class LoggerDB
     /**
      * timer
      *
-     * @var int|null
+     * @var float|null
      */
-    private ?int $timer;
+    private ?float $timer = null;
 
     /**
      * log
