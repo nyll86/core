@@ -20,7 +20,7 @@ class Cache
      *
      * @var self
      */
-    private static Cache $instance;
+    private static ?Cache $instance = null;
 
     /**
      * available service
